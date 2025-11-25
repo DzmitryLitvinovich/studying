@@ -4,60 +4,59 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.25.xsd">
 
-    <changeSet id="001-create-roles-table" author="dzmitry.litvinovich">
+    <changeSet id="1" author="dzmitry.litvinovich">
         <createTable tableName="roles">
-            <column name="id" type="BIGSERIAL" autoIncrement="true">
+            <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="name" type="VARCHAR(50)">
+            <column name="name" type="TEXT">
                 <constraints unique="true" nullable="false"/>
             </column>
             <column name="description" type="TEXT"/>
         </createTable>
 
-        <createIndex tableName="roles" indexName="idx_roles_name">
+        <createIndex tableName="roles" indexName="idx_roles_name"  unique="true">
             <column name="name"/>
         </createIndex>
     </changeSet>
 
-    <changeSet id="002-create-users-table" author="dzmitry.litvinovich">
+    <changeSet id="2" author="dzmitry.litvinovich">
         <createTable tableName="users">
-            <column name="id" type="BIGSERIAL" autoIncrement="true">
+            <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="name" type="VARCHAR(256)">
+            <column name="name" type="TEXT">
                 <constraints nullable="false"/>
             </column>
-            <column name="surname" type="VARCHAR(256)">
+            <column name="surname" type="TEXT">
                 <constraints nullable="false"/>
             </column>
             <column name="age" type="INTEGER">
                 <constraints nullable="false"/>
             </column>
-            <column name="username" type="VARCHAR(16)">
+            <column name="username" type="TEXT">
                 <constraints nullable="false" unique="true"/>
             </column>
-            <column name="password" type="VARCHAR(256)">
+            <column name="password" type="TEXT">
                 <constraints nullable="false"/>
             </column>
-            <column name="inserted_date_at_utc" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+            <column name="inserted_date_at_utc" type="TIMESTAMP WITHOUT TIME ZONE">
                 <constraints nullable="false"/>
             </column>
-            <column name="updated_date_at_utc" type="TIMESTAMP"/>
+            <column name="updated_date_at_utc" type="TIMESTAMP WITHOUT TIME ZONE"/>
         </createTable>
 
-        <createIndex tableName="users" indexName="idx_users_username">
+        <createIndex tableName="users" indexName="idx_users_username" unique="true" >
             <column name="username"/>
         </createIndex>
 
-        <createIndex tableName="users" indexName="idx_users_name_surname">
-            <column name="name"/>
-            <column name="surname"/>
-        </createIndex>
     </changeSet>
 
-    <changeSet id="003-create-user-roles-table" author="dzmitry.litvinovich">
+    <changeSet id="3" author="dzmitry.litvinovich">
         <createTable tableName="user_roles">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
             <column name="user_id" type="BIGINT">
                 <constraints nullable="false"
                              foreignKeyName="fk_user_roles_user"
@@ -70,15 +69,20 @@
                              references="roles(id)"
                              deleteCascade="true"/>
             </column>
-            <column name="assigned_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+            <column name="active" type="BOOLEAN" defaultValue="true">
                 <constraints nullable="false"/>
             </column>
+            <column name="created" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="TIMESTAMP WITHOUT TIME ZONE"/>
+
         </createTable>
 
-        <addPrimaryKey
-                tableName="user_roles"
-                columnNames="user_id, role_id"
-                constraintName="pk_user_roles"/>
+        <createIndex tableName="user_roles" indexName="uq_user_roles_user_role" unique="true">
+            <column name="user_id"/>
+            <column name="role_id"/>
+        </createIndex>
 
         <createIndex tableName="user_roles" indexName="idx_user_roles_user_id">
             <column name="user_id"/>
@@ -87,81 +91,6 @@
         <createIndex tableName="user_roles" indexName="idx_user_roles_role_id">
             <column name="role_id"/>
         </createIndex>
-    </changeSet>
-
-    <changeSet id="004-insert-initial-roles" author="dzmitry.litvinovich">
-        <insert tableName="roles">
-            <column name="name" value="ADMIN"/>
-            <column name="description" value="Administrator with full access"/>
-        </insert>
-        <insert tableName="roles">
-            <column name="name" value="USER"/>
-            <column name="description" value="Regular user"/>
-        </insert>
-        <insert tableName="roles">
-            <column name="name" value="MODERATOR"/>
-            <column name="description" value="Content moderator"/>
-        </insert>
-        <insert tableName="roles">
-            <column name="name" value="MANAGER"/>
-            <column name="description" value="Business manager"/>
-        </insert>
-    </changeSet>
-
-    <changeSet id="005-insert-test-users" author="dzmitry.litvinovich">
-        <insert tableName="users">
-            <column name="name" value="John"/>
-            <column name="surname" value="Doe"/>
-            <column name="age" value="30"/>
-            <column name="username" value="john_doe"/>
-            <column name="password" value="$2a$10$hashed_password_example"/>
-            <column name="inserted_date_at_utc" valueComputed="CURRENT_TIMESTAMP"/>
-        </insert>
-
-        <insert tableName="users">
-            <column name="name" value="Jane"/>
-            <column name="surname" value="Smith"/>
-            <column name="age" value="25"/>
-            <column name="username" value="jane_smith"/>
-            <column name="password" value="$2a$10$hashed_password_example"/>
-            <column name="inserted_date_at_utc" valueComputed="CURRENT_TIMESTAMP"/>
-        </insert>
-
-        <insert tableName="users">
-            <column name="name" value="Admin"/>
-            <column name="surname" value="User"/>
-            <column name="age" value="35"/>
-            <column name="username" value="admin"/>
-            <column name="password" value="$2a$10$hashed_password_example"/>
-            <column name="inserted_date_at_utc" valueComputed="CURRENT_TIMESTAMP"/>
-        </insert>
-    </changeSet>
-
-    <changeSet id="006-assign-initial-roles" author="dzmitry.litvinovich">
-        <insert tableName="user_roles">
-            <column name="user_id" valueComputed="(SELECT id FROM users WHERE username = 'admin')"/>
-            <column name="role_id" valueComputed="(SELECT id FROM roles WHERE name = 'ADMIN')"/>
-        </insert>
-
-        <insert tableName="user_roles">
-            <column name="user_id" valueComputed="(SELECT id FROM users WHERE username = 'admin')"/>
-            <column name="role_id" valueComputed="(SELECT id FROM roles WHERE name = 'USER')"/>
-        </insert>
-
-        <insert tableName="user_roles">
-            <column name="user_id" valueComputed="(SELECT id FROM users WHERE username = 'john_doe')"/>
-            <column name="role_id" valueComputed="(SELECT id FROM roles WHERE name = 'USER')"/>
-        </insert>
-
-        <insert tableName="user_roles">
-            <column name="user_id" valueComputed="(SELECT id FROM users WHERE username = 'jane_smith')"/>
-            <column name="role_id" valueComputed="(SELECT id FROM roles WHERE name = 'USER')"/>
-        </insert>
-
-        <insert tableName="user_roles">
-            <column name="user_id" valueComputed="(SELECT id FROM users WHERE username = 'jane_smith')"/>
-            <column name="role_id" valueComputed="(SELECT id FROM roles WHERE name = 'MODERATOR')"/>
-        </insert>
     </changeSet>
 
 </databaseChangeLog>
