@@ -1,0 +1,32 @@
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "psql postgresql://postgres@:5432/postgres -c 'select 1;'" ]
+      interval: 10s
+      timeout: 3s
+      retries: 15
+
+  liquibase-users:
+    image: liquibase/liquibase:4.25
+    container_name: liquibase-users
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./databases/:/databases/
+    command: >
+      liquibase
+        --logLevel=INFO
+        --driver=org.postgresql.Driver
+        --classpath="/databases/users/"
+        --changeLogFile="changelog.xml"
+        --url="jdbc:postgresql://postgres:5432/postgres"
+        --username=postgres
+        --password=postgres  
+      update
