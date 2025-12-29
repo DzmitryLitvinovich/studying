@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@Transactional
 public class UserService {
     private final UserRepository userRepository;
 
@@ -28,19 +27,26 @@ public class UserService {
         return userRepository.findByUsername(username);
     }
 
+    @Transactional
     public User save(User user) {
         return userRepository.save(user);
     }
 
+    @Transactional
     public User update(User user) {
         return userRepository.save(user);
     }
 
+    @Transactional
     public void delete(Long id) {
         userRepository.deleteById(id);
     }
 
     public boolean existsByUsername(String username) {
         return userRepository.existsByUsername(username);
+    }
+
+    public List<User> findAllActive() {
+        return userRepository.findByActiveTrue();
     }
 }

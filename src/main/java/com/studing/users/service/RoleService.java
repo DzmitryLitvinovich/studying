@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@Transactional
 public class RoleService {
     private final RoleRepository roleRepository;
 
@@ -28,14 +27,17 @@ public class RoleService {
         return roleRepository.findByName(name);
     }
 
+    @Transactional
     public Role save(Role role) {
         return roleRepository.save(role);
     }
 
+    @Transactional
     public Role update(Role role) {
         return roleRepository.save(role);
     }
 
+    @Transactional
     public void delete(Long id) {
         roleRepository.deleteById(id);
     }

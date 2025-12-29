@@ -91,16 +91,21 @@ public class StudyingApp implements CommandLineRunner {
         }
 
         System.out.println("Total users: " + users.size());
-        System.out.println("+----+------------+----------------------+-----+");
-        System.out.println("| ID | Username   | Name                 | Age |");
-        System.out.println("+----+------------+----------------------+-----+");
+        System.out.println("+----+------------+----------------------+-----+--------+---------------------+---------------------+");
+        System.out.println("| ID | Username   | Name                 | Age | Active | Created             | Last Updated        |");
+        System.out.println("+----+------------+----------------------+-----+--------+---------------------+---------------------+");
 
         for (User user : users) {
             String fullName = user.getName() + " " + user.getSurname();
-            System.out.printf("| %-2d | %-10s | %-20s | %-3d |\n",
-                    user.getId(), user.getUsername(), fullName, user.getAge());
+            String active = user.getActive() ? "Yes" : "No";
+            String created = user.getInsertedAt() != null ? user.getInsertedAt().toString() : "N/A";
+            String updated = user.getUpdatedAt() != null ? user.getUpdatedAt().toString() : "N/A";
+
+            System.out.printf("| %-2d | %-10s | %-20s | %-3d | %-6s | %-19s | %-19s |\n",
+                    user.getId(), user.getUsername(), fullName, user.getAge(),
+                    active, created, updated);
         }
-        System.out.println("+----+------------+----------------------+-----+");
+        System.out.println("+----+------------+----------------------+-----+--------+---------------------+---------------------+");
     }
 
     private void createNewUser(Scanner scanner) {
@@ -135,12 +140,14 @@ public class StudyingApp implements CommandLineRunner {
             newUser.setSurname(surname);
             newUser.setAge(age);
             newUser.setPassword(password);
+            newUser.setActive(true); // По умолчанию активен
 
             // Save user
             User savedUser = userService.save(newUser);
             System.out.println("\nSUCCESS: User created!");
             System.out.println("User ID: " + savedUser.getId());
             System.out.println("Username: " + savedUser.getUsername());
+            System.out.println("Active: " + (savedUser.getActive() ? "Yes" : "No"));
 
         } catch (NumberFormatException e) {
             System.out.println("Error: Age must be a number!");
@@ -162,6 +169,9 @@ public class StudyingApp implements CommandLineRunner {
                     System.out.println("Name: " + user.getName());
                     System.out.println("Surname: " + user.getSurname());
                     System.out.println("Age: " + user.getAge());
+                    System.out.println("Active: " + (user.getActive() ? "Yes" : "No"));
+                    System.out.println("Created: " + user.getInsertedAt());
+                    System.out.println("Last Updated: " + user.getUpdatedAt());
                     System.out.println();
 
                     System.out.println("Enter new data (press Enter to keep current value):");
@@ -194,10 +204,16 @@ public class StudyingApp implements CommandLineRunner {
                         user.setPassword(newPassword);
                     }
 
+                    System.out.print("Active? (yes/no) [" + (user.getActive() ? "yes" : "no") + "]: ");
+                    String activeInput = scanner.nextLine();
+                    if (!activeInput.isEmpty()) {
+                        user.setActive(activeInput.equalsIgnoreCase("yes"));
+                    }
+
                     // Update user
                     User updatedUser = userService.update(user);
                     System.out.println("\nSUCCESS: User updated!");
-                    System.out.println("Updated at: " + updatedUser.getUpdatedDateAtUtc());
+                    System.out.println("Updated at: " + updatedUser.getUpdatedAt());
 
                 },
                 () -> System.out.println("Error: User '" + username + "' not found!")
@@ -216,14 +232,18 @@ public class StudyingApp implements CommandLineRunner {
                     System.out.println("ID: " + user.getId());
                     System.out.println("Username: " + user.getUsername());
                     System.out.println("Name: " + user.getName() + " " + user.getSurname());
+                    System.out.println("Active: " + (user.getActive() ? "Yes" : "No"));
+                    System.out.println("Created: " + user.getInsertedAt());
                     System.out.println();
 
                     System.out.print("Are you sure? (yes/no): ");
                     String confirmation = scanner.nextLine();
 
                     if (confirmation.equalsIgnoreCase("yes")) {
-                        userService.delete(user.getId());
-                        System.out.println("SUCCESS: User deleted!");
+                        // Мягкое удаление (деактивация)
+                        user.setActive(false);
+                        userService.update(user);
+                        System.out.println("SUCCESS: User deactivated (soft delete)!");
                     } else {
                         System.out.println("Deletion cancelled.");
                     }
@@ -245,8 +265,9 @@ public class StudyingApp implements CommandLineRunner {
                     System.out.println("Username: " + user.getUsername());
                     System.out.println("Full Name: " + user.getName() + " " + user.getSurname());
                     System.out.println("Age: " + user.getAge());
-                    System.out.println("Created: " + user.getInsertedDateAtUtc());
-                    System.out.println("Last Updated: " + user.getUpdatedDateAtUtc());
+                    System.out.println("Active: " + (user.getActive() ? "Yes" : "No"));
+                    System.out.println("Created: " + user.getInsertedAt());
+                    System.out.println("Last Updated: " + user.getUpdatedAt());
                     System.out.println();
 
                     // Show user roles
@@ -329,15 +350,20 @@ public class StudyingApp implements CommandLineRunner {
                 System.out.println("No users found with role: " + roleName);
             } else {
                 System.out.println("Found " + users.size() + " user(s):");
-                System.out.println("+------------+----------------------+");
-                System.out.println("| Username   | Name                 |");
-                System.out.println("+------------+----------------------+");
+                System.out.println("+------------+----------------------+--------+---------------------+");
+                System.out.println("| Username   | Name                 | Active | Created             |");
+                System.out.println("+------------+----------------------+--------+---------------------+");
 
                 for (User user : users) {
                     String fullName = user.getName() + " " + user.getSurname();
-                    System.out.printf("| %-10s | %-20s |\n", user.getUsername(), fullName);
+                    String active = user.getActive() ? "Yes" : "No";
+                    String created = user.getInsertedAt() != null ?
+                            user.getInsertedAt().toString().substring(0, 16) : "N/A";
+
+                    System.out.printf("| %-10s | %-20s | %-6s | %-19s |\n",
+                            user.getUsername(), fullName, active, created);
                 }
-                System.out.println("+------------+----------------------+");
+                System.out.println("+------------+----------------------+--------+---------------------+");
             }
         } catch (Exception e) {
             System.out.println("ERROR: " + e.getMessage());

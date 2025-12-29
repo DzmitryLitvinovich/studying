@@ -6,12 +6,10 @@ import com.studing.users.entity.UserRole;
 import com.studing.users.repository.UserRoleRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@Transactional
 public class UserRoleService {
     private final UserRoleRepository userRoleRepository;
     private final UserService userService;
@@ -41,6 +39,7 @@ public class UserRoleService {
         return getUserRoles(user.getId());
     }
 
+    @Transactional
     public void addRoleToUser(Long userId, Long roleId) {
         boolean alreadyHasRole = userRoleRepository
                 .existsByUserIdAndRoleIdAndActiveTrue(userId, roleId);
@@ -56,27 +55,28 @@ public class UserRoleService {
         userRole.setUser(user);
         userRole.setRole(role);
         userRole.setActive(true);
-        userRole.setCreated(LocalDateTime.now());
 
         userRoleRepository.save(userRole);
     }
 
+    @Transactional
     public void addRoleToUser(String username, String roleName) {
         User user = findUserByUsername(username);
         Role role = findRoleByName(roleName);
         addRoleToUser(user.getId(), role.getId());
     }
 
+    @Transactional
     public void removeRoleFromUser(Long userId, Long roleId) {
         UserRole userRole = userRoleRepository
                 .findActiveByUserIdAndRoleId(userId, roleId)
                 .orElseThrow(() -> new RuntimeException("Role not assigned to user"));
 
         userRole.setActive(false);
-        userRole.setUpdated(LocalDateTime.now());
         userRoleRepository.save(userRole);
     }
 
+    @Transactional
     public void removeRoleFromUser(String username, String roleName) {
         User user = findUserByUsername(username);
         Role role = findRoleByName(roleName);
@@ -103,7 +103,6 @@ public class UserRoleService {
 
     public List<User> getUsersWithRole(String roleName) {
         List<UserRole> userRoles = userRoleRepository.findActiveByRoleName(roleName);
-
         List<User> users = new ArrayList<>();
 
         for (UserRole userRole : userRoles) {

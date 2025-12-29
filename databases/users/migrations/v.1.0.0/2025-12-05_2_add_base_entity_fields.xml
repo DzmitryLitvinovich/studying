@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog 
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.25.xsd">
+
+    <changeSet id="2025-12-05-1" author="dzmitry.litvinovich">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="users"/>
+            <columnExists tableName="users" columnName="inserted_date_at_utc"/>
+        </preConditions>
+
+        <comment>Rename date fields in users table</comment>
+
+        <renameColumn tableName="users"
+                      oldColumnName="inserted_date_at_utc"
+                      newColumnName="inserted_at"
+                      columnDataType="TIMESTAMP"/>
+
+        <renameColumn tableName="users"
+                      oldColumnName="updated_date_at_utc"
+                      newColumnName="updated_at"
+                      columnDataType="TIMESTAMP"/>
+    </changeSet>
+
+    <changeSet id="2025-12-05-2" author="dzmitry.litvinovich">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="roles"/>
+            <not>
+                <columnExists tableName="roles" columnName="active"/>
+            </not>
+        </preConditions>
+
+        <comment>Add BaseEntity fields to roles table</comment>
+
+        <addColumn tableName="roles">
+            <column name="active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="inserted_at" type="TIMESTAMP" defaultValueDate="NOW()">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="2025-12-05-3" author="dzmitry.litvinovich">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="users"/>
+            <not>
+                <columnExists tableName="users" columnName="active"/>
+            </not>
+        </preConditions>
+
+        <comment>Add active field to users table</comment>
+
+        <addColumn tableName="users">
+            <column name="active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="2025-12-05-4" author="dzmitry.litvinovich">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="user_roles"/>
+        </preConditions>
+
+        <comment>Update user_roles table to match BaseEntity</comment>
+
+        <dropColumn tableName="user_roles" columnName="active"/>
+
+        <renameColumn tableName="user_roles"
+                      oldColumnName="created"
+                      newColumnName="inserted_at"
+                      columnDataType="TIMESTAMP"/>
+
+        <renameColumn tableName="user_roles"
+                      oldColumnName="updated"
+                      newColumnName="updated_at"
+                      columnDataType="TIMESTAMP"/>
+
+        <addColumn tableName="user_roles">
+            <column name="active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

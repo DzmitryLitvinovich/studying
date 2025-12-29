@@ -2,16 +2,13 @@ package com.studing.users.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import java.time.LocalDateTime;
+import lombok.EqualsAndHashCode;
 
 @Entity
 @Table(name = "user_roles")
 @Data
-public class UserRole {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+@EqualsAndHashCode(callSuper = true)
+public class UserRole extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -19,24 +16,5 @@ public class UserRole {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
-
-    @Column(nullable = false)
-    private Boolean active = true;
-
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime created;
-
-    @Column
-    private LocalDateTime updated;
-
-    @PrePersist
-    protected void onCreate() {
-        created = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updated = LocalDateTime.now();
-    }
 
 }
