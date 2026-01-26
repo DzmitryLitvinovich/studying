@@ -15,12 +15,12 @@
         <renameColumn tableName="users"
                       oldColumnName="inserted_date_at_utc"
                       newColumnName="inserted_at"
-                      columnDataType="TIMESTAMP"/>
+                      columnDataType="TIMESTAMP WITHOUT TIME ZONE"/>
 
         <renameColumn tableName="users"
                       oldColumnName="updated_date_at_utc"
                       newColumnName="updated_at"
-                      columnDataType="TIMESTAMP"/>
+                      columnDataType="TIMESTAMP WITHOUT TIME ZONE"/>
     </changeSet>
 
     <changeSet id="2025-12-05-2" author="dzmitry.litvinovich">
@@ -40,7 +40,7 @@
             <column name="inserted_at" type="TIMESTAMP" defaultValueDate="NOW()">
                 <constraints nullable="false"/>
             </column>
-            <column name="updated_at" type="TIMESTAMP"/>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
         </addColumn>
     </changeSet>
 
@@ -73,12 +73,12 @@
         <renameColumn tableName="user_roles"
                       oldColumnName="created"
                       newColumnName="inserted_at"
-                      columnDataType="TIMESTAMP"/>
+                      columnDataType="TIMESTAMP WITHOUT TIME ZONE"/>
 
         <renameColumn tableName="user_roles"
                       oldColumnName="updated"
                       newColumnName="updated_at"
-                      columnDataType="TIMESTAMP"/>
+                      columnDataType="TIMESTAMP WITHOUT TIME ZONE"/>
 
         <addColumn tableName="user_roles">
             <column name="active" type="BOOLEAN" defaultValueBoolean="true">
