@@ -17,6 +17,6 @@ public class Role extends BaseEntity {
     @Column
     private String description;
 
-    @OneToMany(mappedBy = "role", cascade = CascadeType.ALL)
-    private Set<UserRole> userRoles = new HashSet<>();
+    @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
+    private Set<User> users = new HashSet<>();
 }
